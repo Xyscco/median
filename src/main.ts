@@ -1,13 +1,14 @@
-import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ValidationPipe } from '@nestjs/common';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { PrismaClientExceptionFilter } from './prisma-client-exception/prisma-client-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true })); // PARA LIMPAR ITENS NÃO NECESSÁRIOS NO CORPO DA REQUISIÇÃO QUE NÃO ESTÃO PRESENTES NO DTO
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector))); // PARA TRATAR REQUISIÇÕES PARA TRANSFORMAR OBJETOS
 
   const config = new DocumentBuilder()
     .setTitle('Median')
